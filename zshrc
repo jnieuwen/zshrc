@@ -1,6 +1,22 @@
 # $Id: 10b744a52bc48562a9aac3043833164a9fc2e671 $
 # Lines configured by zsh-newuser-install
+PATH=/usr/local/bin:/usr/local/sbin:~/bin:/sw/bin:/sw/sbin:~/scripts:$PATH
+PATH=/opt/local/bin:/opt/local/sbin:$PATH:/Users/jnieuwen/android-sdk-mac_86/tools
+PATH=$PATH:/usr/local/opt/go/libexec/bin:/Users/jnieuwen/.cargo/bin
 export PATH
+
+# Zplug 
+export ZPLUG_HOME=/usr/local/opt/zplug
+# fasd 
+eval "$(fasd --init auto)"
+
+
+source $ZPLUG_HOME/init.zsh
+zplug "wfxr/forgit"
+zplug "wookayin/fzf-fasd"
+
+zplug load 
+
 
 export LANG=en_US.UTF-8
 export LC_CTYPE=en_US.UTF-8
@@ -21,6 +37,13 @@ export LC_ALL=
 export HISTFILE=~/.histfile
 export HISTSIZE=1000
 export SAVEHIST=1000
+export TEXBASE=/usr/local/texlive/2016/texmf-dist/tex/latex
+#export TEXINPUTS=$TEXBASE/base/:$TEXBASE/supertabular/:$TEXBASE/graphics/:$TEXBASE/rotating/:$TEXBASE/fancyhdr/:$TEXBASE/ae/:$TEXBASE/subfigure/:$TEXBASE/ntgclass/:$TEXBASE/isodoc:$TEXBASE/latexconfig:$HOME/files/t/templates/:.
+#for addit in $TEXBASE/*
+#do
+#	TEXINPUTS=$TEXINPUTS:$addit
+#done
+export TEXINPUTS=/usr/local/texlive/2016/texmf-dist/tex//:$HOME/archive/2012-11-pre/t/templates/:.
 
 # Source our default exports and aliasses
 # so we do not have to maintain 2 seperate instances.
@@ -31,6 +54,26 @@ export PAGER=/usr/bin/less
 bindkey -e
 
 alias cd="cd -P"
+alias down="cd $HOME/Downloads"
+alias gca='git commit -a'
+alias gpom='git push origin master'
+alias hermod='ssh hermod'
+alias his2sh="fc -l -n -100"
+alias in="cd $HOME/inbox/"
+alias irn='cd irn'
+alias irn_gitnijmegen='cd ~/irn/git/nijmegen'
+alias irn_gitrc3='cd ~/irn/git/rc3'
+alias irn_kinit='kinit -f jeroen.van.nieuwenhuizen@NL.IRN'
+alias pd=pushd
+alias po=popd
+alias puppv='puppet parser validate'
+alias r='fc -s'
+alias splitmp3="mp3splt -o '@N3-@f' -t 5.00 -d "
+alias stopisstart='fc -s stop=start'
+alias amazon="cd '/Users/jnieuwen/Library/Containers/com.amazon.Kindle/Data/Library/Application Support/Kindle/My Kindle Content'"
+alias svnkw="svn propset svn:keywords 'Id URL Author Date Rev' "
+#alias vim=/usr/local/bin/vim
+alias youtube-mp3="youtube-dl -x --audio-format mp3 --add-metadata"
 alias dirs="dirs -v"
 alias steve=jobs
 
@@ -58,6 +101,11 @@ ulimit -c 0
 
 LOGCHECK=10
 watch=(all)
+
+if [ -f $HOME/.ssh_agent.txt ]
+then
+	source $HOME/.ssh_agent.txt
+fi
 
 if [ $TERM=xterm ]
 then
@@ -94,6 +142,8 @@ setopt PROMPT_SUBST
 # Completions.
 
 # Usernames
+zstyle ':completion:*' users jnieuwen root jeroen.van.nieuwenhuizen
+
 
 autoload -Uz vcs_info
 zstyle ':vcs_info:*' enable git svn
@@ -113,19 +163,63 @@ zstyle ':completion:*' hosts \
 
 precmd () { vcs_info }
 
-#periodic()
-#{
-#	source $HOME/.bash/alias
-#}
+# jnifunc:
+markdown2dokuwiki() { # <file.md> - converts <file>.md to <file>.dokuwiki
+	pandoc -f markdown -t dokuwiki -o ${1/.md/.dokuwiki} $1
+}
 
-# fasd 
-#eval "$(fasd --init auto)"
+# jnifunc:
+markdown2pdf() { # <file.md> -  converts <file>.md to <file>.pdf
+	pandoc -f markdown -t latex -o ${1/.md/.pdf} $1
+}
 
-# Zplug 
-#export ZPLUG_HOME=/usr/local/opt/zplug
-#source $ZPLUG_HOME/init.zsh
+# jnifunc:
+newses() { # starts a new tmux session
+    TMUX=''
+    tmux new-session -d -s "$*"
+    tmux switch-client -t "$*"
+}
 
-#zplug "wfxr/forgit"
-#zplug "wookayin/fzf-fasd"
+# jnifunc:
+jnihelp() { # Shows my zsh functions
+    grep "jn[i]func:" -A1 $HOME/.zshrc | grep -v "jn[i]func:"
+}
 
-#zplug load 
+# Work in progress directory
+
+# jnifunc:
+wip() { # Change to the work in progress directory (subdir)
+    cd $HOME/wip/$1
+}
+
+_wip_complete() {
+    local -a subcmds
+    subcmds=($(ls $HOME/wip | sort))
+    _describe 'command' subcmds
+}
+compdef _wip_complete wip
+
+# jnifunc:
+activate() { # Activate a given virtual env (~/venv/<venv>)
+    source $HOME/venv/$1/bin/activate
+}
+
+_activate_complete() {
+    local -a subcmds
+    subcmds=($(ls $HOME/venv | sort))
+    _describe 'command' subcmds
+}
+compdef _activate_complete activate
+
+_cheat_complete() {
+    local -a subcmds
+    subcmds=($(find $HOME/.dotfiles/cheat -exec basename {} \; | sort ))
+    _describe 'command' subcmds
+}
+compdef _cheat_complete cheat
+
+# Include autojump stuff
+[ -f /usr/local/etc/profile.d/autojump.sh ] && . /usr/local/etc/profile.d/autojump.sh
+
+
+
