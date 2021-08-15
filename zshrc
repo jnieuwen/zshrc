@@ -3,17 +3,30 @@
 PATH=/usr/local/bin:/usr/local/sbin:~/bin:/sw/bin:/sw/sbin:~/scripts:$PATH
 PATH=/opt/local/bin:/opt/local/sbin:$PATH:/Users/jnieuwen/android-sdk-mac_86/tools
 PATH=$PATH:/usr/local/opt/go/libexec/bin:/Users/jnieuwen/.cargo/bin
+PATH=$PATH:/Users/jnieuwen/.local/bin
 export PATH
+
+# Vi mode timeout.
+export KEYTIMEOUT=1
 
 # Zplug 
 export ZPLUG_HOME=/usr/local/opt/zplug
 # fasd 
 eval "$(fasd --init auto)"
-
+alias v='f -e vim'
+alias gf-feature-start='git flow feature start'
+alias gf-feature-finish='git flow feature finish'
+alias gf-release-start='git flow release start'
+alias gf-release-finish='git flow release finish'
+alias gf-hotfix-start='git flow hotfix start'
+alias gf-hotfix-finish='git flow hotfix finish'
+alias gf-support-start='git flow support start'
+alias gf-support-finish='git flow support finish'
+alias gf-push='git push --set-upstream origin'
 
 source $ZPLUG_HOME/init.zsh
-zplug "wfxr/forgit"
-zplug "wookayin/fzf-fasd"
+#zplug "wfxr/forgit"
+#zplug "wookayin/fzf-fasd"
 
 zplug load 
 
@@ -60,22 +73,18 @@ alias gpom='git push origin master'
 alias hermod='ssh hermod'
 alias his2sh="fc -l -n -100"
 alias in="cd $HOME/inbox/"
-alias irn='cd irn'
-alias irn_gitnijmegen='cd ~/irn/git/nijmegen'
-alias irn_gitrc3='cd ~/irn/git/rc3'
-alias irn_kinit='kinit -f jeroen.van.nieuwenhuizen@NL.IRN'
 alias pd=pushd
 alias po=popd
 alias puppv='puppet parser validate'
 alias r='fc -s'
-alias splitmp3="mp3splt -o '@N3-@f' -t 5.00 -d "
 alias stopisstart='fc -s stop=start'
 alias amazon="cd '/Users/jnieuwen/Library/Containers/com.amazon.Kindle/Data/Library/Application Support/Kindle/My Kindle Content'"
-alias svnkw="svn propset svn:keywords 'Id URL Author Date Rev' "
-#alias vim=/usr/local/bin/vim
-alias youtube-mp3="youtube-dl -x --audio-format mp3 --add-metadata"
 alias dirs="dirs -v"
 alias steve=jobs
+alias fixes='rg "TODO|FIXME"'
+alias fetchshell='pushd ~/inbox && scp -r shell:~/inbox/"*" . && ssh shell "cd ~/inbox && rm -rfv *" && popd'
+alias standup='jrnl -from "-36 hours"'
+alias ls='ls -G'
 
 # Make sure we are in our home dir. (Fix apple bug)
 cd ~
@@ -117,7 +126,7 @@ export PERIOD=180
 export DIRSTACKSIZE=7
 export WATCHFMT='20%D %T: %n has %a (%M)'
 export REPORTTIME=10
-export CDPATH=~/cache
+#export CDPATH=~/cache
 
 # Perl readline library
 export PERL_RL=Zoid
@@ -126,7 +135,7 @@ export PERL_RL=Zoid
 # PROMPTS
 export RPROMPT="%D{%H:%M:%S}"
 export PS1='(ret: %?) (jobs: %j) ($SHELL) (%4~) (%D{%I:%M %p}) $vcs_info_msg_0_
-[%!][%{${fg[blue]}%}%B%n%{${fg[yellow]}%}@%{${fg[green]}%}%m%b%{${fg[default]}%}]%# '
+[%!][%{${fg[blue]}%}%B%n%{${fg[yellow]}%}@%{${fg[magenta]}%}%m%b%{${fg[default]}%}]%# '
 
 #-------------------------------------------------------------------------------
 # The options we want
@@ -218,8 +227,58 @@ _cheat_complete() {
 }
 compdef _cheat_complete cheat
 
+# jnifunc:
+dailywww() { # Open the webpages I have to review daily
+    open "http://grafana.service.dc1.docker.jeroen.se:3000/d/Zf2yXX_mk/my-dashboard?orgId=1&refresh=1m"
+    open "http://hrund.jeroen.se:8000"
+    open "http://nagios.service.dc1.docker.jeroen.se/nagios/cgi-bin/tac.cgi"
+    open "https://www.buienradar.nl/weer/delft/nl/2757345/14daagse"
+}
+
 # Include autojump stuff
 [ -f /usr/local/etc/profile.d/autojump.sh ] && . /usr/local/etc/profile.d/autojump.sh
 
 
+source $HOME/.poetry/env
+source $HOME/.zsh/git_worktree.zsh
 
+if [ -f /Users/jnieuwen/.ghcup/env ]
+then
+    source /Users/jnieuwen/.ghcup/env
+fi
+
+if which starship > /dev/null 2>&1
+then
+    eval $(starship init zsh)
+fi
+
+if [ -f ~/bin/myhis.sh ]
+then
+    source ~/bin/myhis.sh
+fi
+
+eval "$(mcfly init zsh)"
+autoload -U +X bashcompinit && bashcompinit
+complete -o nospace -C /usr/local/bin/bit bit
+
+[ -f ~/.sman/sman.rc ] && source ~/.sman/sman.rc
+
+export PATH=$PATH:~/.sman/bin
+
+alias rnw='tmux rename-window'
+alias tks='tmux kill-session -t'
+alias cat='bat -p'
+alias less='bat -p'
+alias grep='rg -N'
+
+source $HOME/bin/stack.sh
+
+source /usr/local/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+
+source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+#  export ZSH_HIGHLIGHT_HIGHLIGHTERS_DIR=/usr/local/share/zsh-syntax-highlighting/highlighters
+
+function tempdir() {
+    mktemp -d "tmp-${1}-XXXX"
+}
